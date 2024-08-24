@@ -1,5 +1,5 @@
 import { Line, xyFromEvent, xyInsideTargets } from "./canvas-utils.js";
-import { RMapEdgeData, RMaps } from "./core.js";
+import { RMaps } from "./core.js";
 
 // Inject tool into Tokens controls
 Hooks.on("getSceneControlButtons", (buttons) => {
@@ -8,11 +8,11 @@ Hooks.on("getSceneControlButtons", (buttons) => {
 
 Hooks.on("libWrapper.Ready", () => {
   // Reset all the wrappers for this module:
-  libWrapper.unregister_all(RMaps.ID);
+  libWrapper.unregister_all("fvtt-r-maps");
 
   // Handle drags from Token:
   libWrapper.register(
-    RMaps.ID,
+    "fvtt-r-maps",
     "Token.prototype._canDrag",
     function (wrapped, ...args) {
       return wrapped(...args) || game.activeTool === "drawEdge";
@@ -20,10 +20,10 @@ Hooks.on("libWrapper.Ready", () => {
     "WRAPPER"
   );
   libWrapper.register(
-    RMaps.ID,
+    "fvtt-r-maps",
     "Token.prototype._onDragLeftStart",
     function (wrapped, ...args) {
-      if (game.activeTool === RMaps.FLAGS.EDGE_TOOL) {
+      if (game.activeTool === "drawEdge") {
         if (canvas.tokens.controlledObjects.size === 1) {
           RMaps.state.originToken = this;
           const pixiLine = (RMaps.state.pixiLine = new Line(this.center));
@@ -40,10 +40,10 @@ Hooks.on("libWrapper.Ready", () => {
     "MIXED"
   );
   libWrapper.register(
-    RMaps.ID,
+    "fvtt-r-maps",
     "Token.prototype._onDragLeftMove",
     (wrapped, event) => {
-      if (game.activeTool === RMaps.FLAGS.EDGE_TOOL) {
+      if (game.activeTool === "drawEdge") {
         if (canvas.tokens.controlledObjects.size === 1) {
           const spot = xyFromEvent(event);
           const pixiLine = RMaps.state.pixiLine;
@@ -57,7 +57,7 @@ Hooks.on("libWrapper.Ready", () => {
     "MIXED"
   );
   libWrapper.register(
-    RMaps.ID,
+    "fvtt-r-maps",
     "Token.prototype._onDragLeftCancel",
     async (wrapped, event) => {
       wrapped(event);
@@ -67,11 +67,11 @@ Hooks.on("libWrapper.Ready", () => {
     "WRAPPER"
   );
   libWrapper.register(
-    RMaps.ID,
+    "fvtt-r-maps",
     "Token.prototype._onDragLeftDrop",
     async (wrapped, event) => {
       if (
-        game.activeTool === RMaps.FLAGS.EDGE_TOOL &&
+        game.activeTool === "drawEdge" &&
         canvas.tokens.controlledObjects.size === 1
       ) {
         try {
@@ -81,11 +81,11 @@ Hooks.on("libWrapper.Ready", () => {
           if (targets.length === 1) {
             // We have a winner.
             const target = targets[0];
-            const edgeId = await RMapEdgeData.createEdge(
+            const edgeId = await RMaps.createEdge(
               RMaps.state.originToken.id,
               { to: target.id }
             );
-            RMapEdgeData.drawEdge(edgeId);
+            RMaps.drawEdge(edgeId);
           }
         } catch (_) {
           // Clean up:
@@ -105,21 +105,21 @@ Hooks.on("updateToken", (token, change) => {
   if (!game.user.isGM) return;
   if (["x", "y", "width", "height"].some((c) => c in change)) {
     const { x, y } = change;
-    RMapEdgeData.updateEdgeDrawingsForToken(token, { x, y });
+    RMaps.updateEdgeDrawingsForToken(token, { x, y });
   }
 });
 
 Hooks.on("preDeleteToken", async (token) => {
-  await RMapEdgeData.deleteAllEdgesToAndFrom(token);
+  await RMaps.deleteAllEdgesToAndFrom(token);
 });
 
 // Handle destroying edge data when the linked drawing is deleted:
 Hooks.on("preDeleteDrawing", async (drawing) => {
   await Promise.all(
-    Object.keys(RMapEdgeData.allEdges).map((edgeKey) => {
-      const edge = RMapEdgeData.allEdges[edgeKey];
+    Object.keys(RMaps.allEdges).map((edgeKey) => {
+      const edge = RMaps.allEdges[edgeKey];
       if (edge.drawingId === drawing.id) {
-        return RMapEdgeData.deleteEdge(edgeKey);
+        return RMaps.deleteEdge(edgeKey);
       }
     })
   );

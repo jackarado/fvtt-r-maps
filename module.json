@@ -26,7 +26,7 @@
     ]
   },
   "type": "module",
-  "esmodules": ["src/index.js"],
+  "esmodules": ["src/hooks.js"],
   "url": "#{URL}#",
   "manifest": "#{MANIFEST}#",
   "download": "#{DOWNLOAD}#",

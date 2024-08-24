@@ -6,17 +6,6 @@ import { getEdgeGivenTwoNodes } from "./canvas-utils.js";
  */
 
 export class RMaps {
-  static ID = "fvtt-r-maps";
-
-  static FLAGS = {
-    EDGES: "r-maps-edges",
-    EDGE_TOOL: "drawEdge",
-  };
-
-  static TEMPLATES = {
-    EDGE: `modules/${this.ID}/templates/r-map-edge.hbs`,
-  };
-
   static state = {
     originToken: null,
     pixiLine: null,
@@ -32,10 +21,7 @@ export class RMaps {
       icon: "fas fa-chart-network",
     });
   }
-}
 
-// TODO: combine this into the class above. It's just a namespace.
-export class RMapEdgeData {
   static get allEdges() {
     const allEdges = (canvas?.scene.tokens || []).reduce(
       (accumulator, token) => {
@@ -54,7 +40,7 @@ export class RMapEdgeData {
 
   static getEdgesForToken(tokenId) {
     return (
-      canvas?.scene.tokens.get(tokenId)?.getFlag(RMaps.ID, RMaps.FLAGS.EDGES) ||
+      canvas?.scene.tokens.get(tokenId)?.getFlag("fvtt-r-maps", "r-maps-edges") ||
       {}
     );
   }
@@ -70,7 +56,7 @@ export class RMapEdgeData {
     };
     await canvas?.scene.tokens
       .get(tokenId)
-      ?.setFlag(RMaps.ID, RMaps.FLAGS.EDGES, newEdges);
+      ?.setFlag("fvtt-r-maps", "r-maps-edges", newEdges);
     return newEdge.id;
   }
 
@@ -81,7 +67,7 @@ export class RMapEdgeData {
     };
     return canvas?.scene.tokens
       .get(relevantEdge.fromId)
-      ?.setFlag(RMaps.ID, RMaps.FLAGS.EDGES, update);
+      ?.setFlag("fvtt-r-maps", "r-maps-edges", update);
   }
 
   static deleteEdge(edgeId) {
@@ -93,7 +79,7 @@ export class RMapEdgeData {
     };
     return canvas?.scene.tokens
       .get(relevantEdge.fromId)
-      ?.setFlag(RMaps.ID, RMaps.FLAGS.EDGES, keyDeletion);
+      ?.setFlag("fvtt-r-maps", "r-maps-edges", keyDeletion);
   }
 
   static deleteAllEdgesToAndFrom(token) {
