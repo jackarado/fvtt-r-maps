@@ -45,45 +45,31 @@ export function getEdgeGivenTwoNodes(fromNode, toNode) {
   // This is the most BRUTE FORCE way I could see to guarantee that the
   // bounding box and corners and lines all match up correctly. It works. It
   // could be improved.
-  //
+
+  const dx = Math.abs(fromNode.x - toNode.x);
+  const dy = Math.abs(fromNode.y - toNode.y);
+
   // Calculate corners:
   const UL = { x: 0, y: 0 };
-  const UR = { x: Math.abs(fromNode.x - toNode.x), y: 0 };
-  const LL = { x: 0, y: Math.abs(fromNode.y - toNode.y) };
-  const LR = {
-    x: Math.abs(fromNode.x - toNode.x),
-    y: Math.abs(fromNode.y - toNode.y),
-  };
+  const UR = { x: dx, y: 0 };
+  const LL = { x: 0, y: dy };
+  const LR = { x: dx, y: dy };
+
 
   // Find the corner we're starting in. We are therefore moving to the
   // opposite corner.
+  // Moves clockwise, starting from the Upper Left
   let origin, destination;
-  if (
-    // UL:
-    fromNode.x == Math.min(fromNode.x, toNode.x)
-    && fromNode.y == Math.min(fromNode.y, toNode.y)
-  ) {
+  if (fromNode.x <= toNode.x && fromNode.y <= toNode.y) {
     origin = UL;
     destination = LR;
-  } else if (
-    // UR:
-    fromNode.x == Math.max(fromNode.x, toNode.x)
-    && fromNode.y == Math.min(fromNode.y, toNode.y)
-  ) {
+  } else if (fromNode.x > toNode.x && fromNode.y <= toNode.y) {
     origin = UR;
     destination = LL;
-  } else if (
-    // LL:
-    fromNode.x == Math.min(fromNode.x, toNode.x)
-    && fromNode.y == Math.max(fromNode.y, toNode.y)
-  ) {
+  } else if (fromNode.x <= toNode.x && fromNode.y > toNode.y) {
     origin = LL;
     destination = UR;
-  } else if (
-    // LR:
-    fromNode.x == Math.max(fromNode.x, toNode.x)
-    && fromNode.y == Math.max(fromNode.y, toNode.y)
-  ) {
+  } else if (fromNode.x > toNode.x && fromNode.y > toNode.y) {
     origin = LR;
     destination = UL;
   }
@@ -94,8 +80,8 @@ export function getEdgeGivenTwoNodes(fromNode, toNode) {
     y: Math.min(fromNode.y, toNode.y),
     shape: {
       type: foundry.data.ShapeData.TYPES.POLYGON,
-      width: Math.abs(toNode.x - fromNode.x),
-      height: Math.abs(toNode.y - fromNode.y),
+      width: dx,
+      height: dy,
       points: [origin.x, origin.y, destination.x, destination.y],
     }
   };
