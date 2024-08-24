@@ -83,26 +83,15 @@ export class RMaps {
   }
 
   static deleteAllEdgesToAndFrom(token) {
-    // Inbound edges:
-    const inbound = Object.values(this.allEdges)
-      .filter((edge) => edge.to === token.id)
+    return Promise.all(
+      Object.values(this.allEdges)
+      .filter((edge) => edge.to === token.id || edge.fromId === token.id)
       .map((edge) => {
         const { drawingId } = edge;
         const drawing = canvas.scene.drawings.get(drawingId);
-        // This will trigger cleaning up the edge data, too, because of the
-        // Drawing.onDelete hook!
-        return drawing.delete();
-      });
-    // Outbound edges:
-    const outbound = Object.values(this.allEdges)
-      .filter((edge) => edge.fromId === token.id)
-      .map((edge) => {
-        const { drawingId } = edge;
-        const drawing = canvas.scene.drawings.get(drawingId);
-        this.deleteEdge(edge.id);
-        return drawing.delete();
-      });
-    return Promise.all([...outbound, ...inbound]);
+        return drawing?.delete();
+      })
+    );
   }
 
   /**
