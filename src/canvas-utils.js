@@ -1,21 +1,14 @@
-/*
- * canvas is global from Foundry
- * PIXI
- */
-import { log } from './debug-log-utils.js';
-
 export function xyFromEvent(event) {
   const ret = {
-    x: event.data.destination.x,
-    y: event.data.destination.y,
+    x: event.interactionData.destination.x,
+    y: event.interactionData.destination.y,
   };
-  log('xyFromEvent', ret);
   return ret;
 }
 
 export function xyInsideTargets({ x, y }) {
   return canvas.tokens.placeables.filter((obj) => {
-    if ( !obj.visible ) { return false; }
+    if (!obj.visible) return false;
     let ul = {
       x: obj.x,
       y: obj.y,
@@ -33,7 +26,7 @@ export class Line extends PIXI.Graphics {
     super();
     this.style = {
       width: 5,
-      color: '0xFF0000',
+      color: "0xFF0000",
     };
 
     this.origin = { x, y };
@@ -55,9 +48,12 @@ export function getEdgeGivenTwoNodes(fromNode, toNode) {
   //
   // Calculate corners:
   const UL = { x: 0, y: 0 };
-  const UR = { x: Math.abs(fromNode.x - toNode.x), y: 0 }
-  const LL = { x: 0, y: Math.abs(fromNode.y - toNode.y) }
-  const LR = { x: Math.abs(fromNode.x - toNode.x), y: Math.abs(fromNode.y - toNode.y) }
+  const UR = { x: Math.abs(fromNode.x - toNode.x), y: 0 };
+  const LL = { x: 0, y: Math.abs(fromNode.y - toNode.y) };
+  const LR = {
+    x: Math.abs(fromNode.x - toNode.x),
+    y: Math.abs(fromNode.y - toNode.y),
+  };
 
   // Find the corner we're starting in. We are therefore moving to the
   // opposite corner.
@@ -74,7 +70,7 @@ export function getEdgeGivenTwoNodes(fromNode, toNode) {
     fromNode.x == Math.max(fromNode.x, toNode.x)
     && fromNode.y == Math.min(fromNode.y, toNode.y)
   ) {
-    origin = UR
+    origin = UR;
     destination = LL;
   } else if (
     // LL:
@@ -100,10 +96,7 @@ export function getEdgeGivenTwoNodes(fromNode, toNode) {
       type: foundry.data.ShapeData.TYPES.POLYGON,
       width: Math.abs(toNode.x - fromNode.x),
       height: Math.abs(toNode.y - fromNode.y),
-      points: [
-        origin.x, origin.y,
-        destination.x, destination.y,
-      ],
+      points: [origin.x, origin.y, destination.x, destination.y],
     },
     // All three must be set, or all three get reset:
     strokeWidth: 5,
