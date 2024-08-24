@@ -97,10 +97,6 @@ export function getEdgeGivenTwoNodes(fromNode, toNode) {
       width: Math.abs(toNode.x - fromNode.x),
       height: Math.abs(toNode.y - fromNode.y),
       points: [origin.x, origin.y, destination.x, destination.y],
-    },
-    // All three must be set, or all three get reset:
-    strokeWidth: 5,
-    strokeAlpha: 1,
-    strokeColor: "#ff0000",
+    }
   };
 }

@@ -153,7 +153,12 @@ export class RMaps {
       .center;
     const toNode = canvas?.scene.tokens.get(relevantEdge.to)._object.center;
 
-    const edge = getEdgeGivenTwoNodes(fromNode, toNode);
+    const edge = {
+      ...getEdgeGivenTwoNodes(fromNode, toNode),
+      strokeWidth: 5,
+      strokeAlpha: 1,
+      strokeColor: "#ff0000",
+    };
 
     const [drawing] = await canvas.scene.createEmbeddedDocuments("Drawing", [
       edge,
