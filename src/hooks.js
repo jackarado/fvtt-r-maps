@@ -116,11 +116,8 @@ Hooks.on("preDeleteToken", async (token) => {
 // Handle destroying edge data when the linked drawing is deleted:
 Hooks.on("preDeleteDrawing", async (drawing) => {
   await Promise.all(
-    Object.keys(RMaps.allEdges).map((edgeKey) => {
-      const edge = RMaps.allEdges[edgeKey];
-      if (edge.drawingId === drawing.id) {
-        return RMaps.deleteEdge(edgeKey);
-      }
-    })
+    Object.entries(RMaps.allEdges)
+      .filter((key, edge) => edge.drawingId === drawing.id)
+      .map((key, edge) => RMaps.deleteEdge(key))
   );
 });
