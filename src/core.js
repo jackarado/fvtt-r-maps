@@ -1,9 +1,4 @@
-/*
- * canvas is global from Foundry
- */
-
-import { log } from './debug-log-utils.js';
-import { getEdgeGivenTwoNodes } from './canvas-utils.js';
+import { getEdgeGivenTwoNodes } from "./canvas-utils.js";
 
 /*
  * We use graph theory terminology here (nodes, edges), so as to not collide
@@ -11,82 +6,68 @@ import { getEdgeGivenTwoNodes } from './canvas-utils.js';
  */
 
 export class RMaps {
-  static ID = 'fvtt-r-maps';
-
-  static FLAGS = {
-    EDGES: 'r-maps-edges',
-    EDGE_TOOL: 'drawEdge',
-  }
-
-  static TEMPLATES = {
-    EDGE: `modules/${this.ID}/templates/r-map-edge.hbs`,
-  }
-
   static state = {
     originToken: null,
     pixiLine: null,
-  }
+  };
 
   // XXX: This should maybe be in our "operations" class?
   // TODO: insert this into Drawing tools, not Token tools.
   static onGetSceneControlButtons(buttons) {
-    const tokenTools = buttons.find((b) => b.name === 'token')?.tools
+    const tokenTools = buttons.find((b) => b.name === "token")?.tools;
     tokenTools?.push({
-      name: 'drawEdge',
-      title: 'Draw a connection',
-      icon: 'fas fa-chart-network',
+      name: "drawEdge",
+      title: "Draw a connection",
+      icon: "fas fa-chart-network",
     });
   }
-}
 
-
-// TODO: combine this into the class above. It's just a namespace.
-export class RMapEdgeData {
   static get allEdges() {
-    const allEdges = (canvas?.scene.tokens || []).reduce((accumulator, token) => {
-      const tokenEdges = this.getEdgesForToken(token.id);
+    const allEdges = (canvas?.scene.tokens || []).reduce(
+      (accumulator, token) => {
+        const tokenEdges = this.getEdgesForToken(token.id);
 
-      return {
-        ...accumulator,
-        ...tokenEdges,
-      };
-    }, {});
+        return {
+          ...accumulator,
+          ...tokenEdges,
+        };
+      },
+      {}
+    );
 
     return allEdges;
   }
 
   static getEdgesForToken(tokenId) {
-    return canvas?.scene.tokens.get(tokenId)?.getFlag(RMaps.ID, RMaps.FLAGS.EDGES) || {};
+    return (
+      canvas?.scene.tokens.get(tokenId)?.getFlag("fvtt-r-maps", "r-maps-edges") ||
+      {}
+    );
   }
 
   static async createEdge(tokenId, edgeData) {
-    /*
-     * edgeData: {
-     *   'to': TokenID,
-     * }
-     */
-    log('beginning createEdge');
     const newEdge = {
       ...edgeData,
       fromId: tokenId,
       id: foundry.utils.randomID(16),
     };
     const newEdges = {
-      [newEdge.id]: newEdge
+      [newEdge.id]: newEdge,
     };
-    await canvas?.scene.tokens.get(tokenId)?.setFlag(RMaps.ID, RMaps.FLAGS.EDGES, newEdges);
-    log('created new edge:', newEdge.id);
+    await canvas?.scene.tokens
+      .get(tokenId)
+      ?.setFlag("fvtt-r-maps", "r-maps-edges", newEdges);
     return newEdge.id;
   }
 
   static updateEdge(edgeId, updateData) {
-    log('beginning updateEdge');
     const relevantEdge = this.allEdges[edgeId];
     const update = {
-      [edgeId]: updateData
+      [edgeId]: updateData,
     };
-    log('updateEdge with', update);
-    return canvas?.scene.tokens.get(relevantEdge.fromId)?.setFlag(RMaps.ID, RMaps.FLAGS.EDGES, update);
+    return canvas?.scene.tokens
+      .get(relevantEdge.fromId)
+      ?.setFlag("fvtt-r-maps", "r-maps-edges", update);
   }
 
   static deleteEdge(edgeId) {
@@ -94,66 +75,89 @@ export class RMapEdgeData {
     // Foundry specific syntax required to delete a key from a persisted object
     // in the database
     const keyDeletion = {
-      [`-=${edgeId}`]: null
+      [`-=${edgeId}`]: null,
     };
     return canvas?.scene.tokens
-      .get(relevantEdge.fromId)?.setFlag(RMaps.ID, RMaps.FLAGS.EDGES, keyDeletion);
+      .get(relevantEdge.fromId)
+      ?.setFlag("fvtt-r-maps", "r-maps-edges", keyDeletion);
   }
 
-  // This pertains to Drawings:
-  static async updateEdgeDrawingsForToken(tokenId) {
-    log('beginning updateEdgeDrawingsForToken');
+  static deleteAllEdgesToAndFrom(token) {
+    return Promise.all(
+      Object.values(this.allEdges)
+      .filter((edge) => edge.to === token.id || edge.fromId === token.id)
+      .map((edge) => {
+        const { drawingId } = edge;
+        const drawing = canvas.scene.drawings.get(drawingId);
+        return drawing?.delete();
+      })
+    );
+  }
+
+  /**
+   *
+   * @param {Token} token
+   * @param {Object} node
+   * @returns
+   */
+  static async updateEdgeDrawingsForToken(token, node = {}) {
     // Inbound edges:
-    const inbound = Object.values(this.allEdges).filter(
-      (edge) => edge.to === tokenId
-    ).map((edge) => {
-      const { drawingId } = edge;
-      const drawing = canvas.scene.drawings.get(drawingId);
+    const inbound = Object.values(this.allEdges)
+      .filter((edge) => edge.to === token.id)
+      .map((edge) => {
+        const { drawingId, fromId } = edge;
+        const fromNode = canvas.scene.tokens.get(fromId)?.object.center;
+        const toNode = token.object.getCenterPoint({
+          x: node.x ?? token.object.x,
+          y: node.y ?? token.object.y,
+        });
 
-      const fromNode = canvas.scene.tokens.get(edge.fromId).object.center;
-      const toNode = canvas.scene.tokens.get(edge.to).object.center;
-
-      const newEdge = getEdgeGivenTwoNodes(fromNode, toNode);
-      return {
-        _id: drawingId,
-        ...newEdge,
-      };
-    });
+        const newEdge = getEdgeGivenTwoNodes(fromNode, toNode);
+        return {
+          _id: drawingId,
+          ...newEdge,
+        };
+      });
     // Outbound edges:
-    const outbound = Object.values(
-      this.getEdgesForToken(tokenId)
-    ).map((edge) => {
-      const { drawingId } = edge;
-      const drawing = canvas.scene.drawings.get(drawingId);
+    const outbound = Object.values(this.getEdgesForToken(token.id)).map(
+      (edge) => {
+        const { drawingId, to } = edge;
 
-      const fromNode = canvas.scene.tokens.get(tokenId).object.center;
-      const toNode = canvas.scene.tokens.get(edge.to).object.center;
+        const fromNode = token.object.getCenterPoint({
+          x: node.x ?? token.object.x,
+          y: node.y ?? token.object.y,
+        });
+        const toNode = canvas.scene.tokens.get(to)?.object.center;
 
-      const newEdge = getEdgeGivenTwoNodes(fromNode, toNode);
-      return {
-        _id: drawingId,
-        ...newEdge,
-      };
-    });
-    log('updateEdgeDrawingsForToken with', inbound, outbound);
+        const newEdge = getEdgeGivenTwoNodes(fromNode, toNode);
+        return {
+          _id: drawingId,
+          ...newEdge,
+        };
+      }
+    );
     // TODO: this is failing for some tokens. I think the pattern is "non-PC
     // actors" and that may be because they're not getting their data stored
     // right?
-    const updates = await canvas.scene.updateEmbeddedDocuments('Drawing', [...inbound, ...outbound])
+    const updates = await canvas.scene.updateEmbeddedDocuments("Drawing", [
+      ...inbound,
+      ...outbound,
+    ]);
     return updates;
   }
 
   // This pertains to Drawings:
   static async drawEdge(edgeId) {
-    log('beginning drawEdge')
     const relevantEdge = this.allEdges[edgeId];
-    const fromNode = canvas?.scene.tokens.get(relevantEdge.fromId)._object.center;
+    const fromNode = canvas?.scene.tokens.get(relevantEdge.fromId)._object
+      .center;
     const toNode = canvas?.scene.tokens.get(relevantEdge.to)._object.center;
 
     const edge = getEdgeGivenTwoNodes(fromNode, toNode);
 
-    log('drawEdge with', edge);
-    const [ drawing ] = await canvas.scene.createEmbeddedDocuments('Drawing', [edge]);
+    const [drawing] = await canvas.scene.createEmbeddedDocuments("Drawing", [
+      edge,
+    ]);
 
     // If we have Tokenmagic set up, apply some default filters:
     if (game.modules.get('tokenmagic')?.active) {
