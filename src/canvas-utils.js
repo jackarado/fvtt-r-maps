@@ -8,7 +8,7 @@ export function xyFromEvent(event) {
 
 export function xyInsideTargets({ x, y }) {
   return canvas.tokens.placeables.filter((obj) => {
-    if (!obj.visible) return false;
+    if (!obj.visible || canvas.tokens.controlledObjects.get(obj.id)) return false;
     let ul = {
       x: obj.x,
       y: obj.y,
