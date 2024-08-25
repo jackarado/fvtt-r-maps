@@ -101,7 +101,7 @@ Hooks.on("libWrapper.Ready", () => {
           if (targets.length === 1) {
             // We have a winner.
             const target = targets[0];
-            const edgeId = await RMaps.createEdge(
+            await RMaps.createEdge(
               RMaps.state.originToken.id,
               { to: target.id }
             );
