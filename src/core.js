@@ -46,21 +46,21 @@ export class RMaps {
   }
 
   static async createEdge(tokenId, edgeData) {
+    const id = foundry.utils.randomID(16);
     const newEdge = {
       ...edgeData,
-      fromId: tokenId,
-      id: foundry.utils.randomID(16),
+      fromId: tokenId
     };
     const newEdges = {
-      [newEdge.id]: newEdge,
+      [id]: newEdge,
     };
     if (!game.user.isGM) {
-      await game.socket.emit("module.fvtt-r-maps", { newEdge, newEdges, tokenId });
+      await game.socket.emit("module.fvtt-r-maps", { id, newEdges, tokenId });
     } else {
       await canvas?.scene.tokens
         .get(tokenId)
         ?.setFlag("fvtt-r-maps", "r-maps-edges", newEdges);
-        this.drawEdge(newEdge.id);
+        this.drawEdge(id);
     }
   }
 

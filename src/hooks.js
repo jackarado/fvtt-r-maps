@@ -8,14 +8,14 @@ Hooks.on("getSceneControlButtons", (buttons) => {
 
 Hooks.once("init", () => {
   game.socket.on("module.fvtt-r-maps", async (data) => {
-    const { newEdge, newEdges, tokenId } = data;
-		if (game.users.activeGM?.isSelf && tokenId) {
-			await canvas?.scene.tokens
+    const { id, newEdges, tokenId } = data;
+    if (game.users.activeGM?.isSelf && tokenId) {
+      await canvas?.scene.tokens
         .get(tokenId)
         ?.setFlag("fvtt-r-maps", "r-maps-edges", newEdges);
-      RMaps.drawEdge(newEdge.id);
-		}
-	});
+      RMaps.drawEdge(id);
+    }
+  });
 });
 
 Hooks.on("libWrapper.Ready", () => {
