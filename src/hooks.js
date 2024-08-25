@@ -1,4 +1,4 @@
-import { Line, xyFromEvent, xyInsideTargets } from "./canvas-utils.js";
+import { isTokenInside, Line, xyFromEvent, xyInsideTargets } from "./canvas-utils.js";
 import { RMaps } from "./core.js";
 
 // Inject tool into Tokens controls
@@ -116,6 +116,78 @@ Hooks.on("libWrapper.Ready", () => {
       }
     },
     "MIXED"
+  );
+  libWrapper.register(
+    "fvtt-r-maps",
+    "TokenLayer.prototype._canDragLeftStart",
+    (wrapped, user, event) => {
+      if (game.activeTool === "drawEdge") return true;
+      return wrapped(user, event);
+    },
+    "MIXED"
+  );
+  libWrapper.register(
+    "fvtt-r-maps",
+    "TokenLayer.prototype._onDragLeftStart",
+    (wrapped, event) => {
+      if (game.activeTool === "drawEdge") {
+        const spot = xyFromEvent(event);
+        const token = canvas.tokens.placeables
+          .filter((t) => t.visible)
+          .find((t) => isTokenInside(t, spot));
+        RMaps.state.originToken = token;
+        RMaps.state.pixiLine = new Line(token.center);
+        RMaps.state.pixiLine.update(spot);
+      } else {
+        wrapped(event);
+      }
+    }, "MIXED"
+  );
+  libWrapper.register(
+    "fvtt-r-maps",
+    "TokenLayer.prototype._onDragLeftMove",
+    (wrapped, event) => {
+      wrapped(event);
+      if (game.activeTool === "drawEdge") {
+        const spot = xyFromEvent(event);
+        RMaps.state.pixiLine.update(spot);
+      }
+    }, "WRAPPER"
+  );
+  libWrapper.register(
+    "fvtt-r-maps",
+    "TokenLayer.prototype._onDragLeftCancel",
+    async (wrapped, event) => {
+      wrapped(event);
+      RMaps.state.pixiLine.clear();
+      RMaps.state.pixiLine = null;
+    }, "WRAPPER"
+  );
+  libWrapper.register(
+    "fvtt-r-maps",
+    "TokenLayer.prototype._onDragLeftDrop",
+    async (wrapped, event) => {
+      wrapped(event);
+      if (game.activeTool === "drawEdge") {
+        try {
+          // Find if we picked a token:
+          const spot = xyFromEvent(event);
+          const targets = xyInsideTargets(spot);
+          if (targets.length === 1) {
+            // We have a winner.
+            const target = targets[0];
+            await RMaps.createEdge(
+              RMaps.state.originToken.id,
+              { to: target.id }
+            );
+          }
+        } catch (_) {
+          // Clean up:
+          RMaps.state.pixiLine.clear();
+          RMaps.state.pixiLine = null;
+        }
+      }
+    }, "WRAPPER"
   );
 });
 
