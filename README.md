@@ -10,69 +10,22 @@ update as you move the tokens around.
 
 ## How-to
 
- 1. Install and enable `fvtt-r-maps`
-    - Optionally, `advanced-drawing-tools` and `tokenmagic`.
- 2. Make a scene for your r-map.
+ 1. Make a scene for your r-map.
     - I like to use a cork-board background.
- 3. Add tokens for your actors that you want to connect on the map.
+    - Disable the scene's Token Vision config.
+ 2. Add tokens for your actors that you want to connect on the map.
     - I like to put these tokens in little polaroid-picture frames and rotate
       them randomly a few degrees left or right. It adds to the _aesthetic_.
- 4. Give the players ownership permissions on any actors that they will need to
-    move, or draw lines out from.
-    - For some tables, this may be only their characters. For others, maybe
-      this is everyone having ownership over everyone. Make the right call for
-      your group and play needs!
-    - However, I will caution that you are likely to get the most ease-of-use
-      out of making every token owned by every player. Perhaps you then lock
-      things down later if you need, perhaps not, but at the time of drawing
-      lines and moving things around, communism is the watchword!
- 5. To draw a line, drag from one token you control to any other.
-    - Optionally, once your lines are all set, the GM or any players with
+ 3. Click on the Draw a Connection control button.
+ 4. Draw a line, dragging from one token to another.
+    - Optionally, once your lines are all set, users with
       drawing permissions can add labels to them, or restyle them, or use
       `advanced-drawing-tools` to add some intermediate points in them and
       curve them.
 
 ## About R-Maps
 
- - [Paul's R-Map Method](https://www.indiegamereadingclub.com/indie-game-reading-club/pauls-r-map-method/)
-
-## TODO
-
- - [X] permissions stuff is weird? Users are having perms errors in the
-   console, but it all seems to be working anyway. Not a comforting situation.
-
-   _ETA_: What was happening: the user updated their token, triggering
-   `Token._onUpdate` both locally, and on the GM's side. The local call failed
-   with permissions problems, the GM call succeeded and then propagated the
-   change to the player's view.
- - [ ] write unit tests. [Quench](https://github.com/Ethaks/FVTT-Quench)?
- - [ ] add CI.
- - [X] add git-tag based CD release process.
- - [ ] make a demonstration animated gif.
- - [ ] make a tutorial video.
-
-These might be handled by Advanced Drawing Tools:
-
- - [X] colour and style. (wouldn't it be great if the style were red yarn?)
- - [X] support adding intermediate control points and getting bezier-y?
-
-   Advanced Drawing Tools _can_ do this one as-is, with caveats mentioned
-   below.
-
-Nice-to-have:
-
- - [ ] add labels on edges that follow the arc.
- - [ ] add endcap arrows.
-
-   (This will require edges not ending at the token center, but actually
-   calculating edge collision.)
- - [ ] Add additional data to edges that let you set up programmatic filters
-
-   ("show all edges from this node", "show all edges labeled 'family'", etc.)
- - [ ] make this all happen on a dedicated RMapLayer, with edge selection and
-   drawing tools on the same submenu.
- - [ ] package polaroid token frame and corkboard background with the module,
-   pending finding some with proper licensing.
+[Paul's R-Map Method](https://www.indiegamereadingclub.com/indie-game-reading-club/pauls-r-map-method/)
 
 ## Mods to synergize with
 
