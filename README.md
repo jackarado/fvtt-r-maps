@@ -1,9 +1,5 @@
 # FVTT R-Maps
 
-![Foundry Core Compatible Version](https://img.shields.io/badge/dynamic/json.svg?url=https%3A%2F%2Fraw.githubusercontent.com%2Fwlonk%2Ffvtt-r-maps%2Fmain%2Fmodule.json&label=Foundry%20Version&query=$.compatibility.verified&colorB=orange)
-![Repository License](https://img.shields.io/github/license/wlonk/fvtt-r-maps)
-[![Forge Installs](https://img.shields.io/badge/dynamic/json?label=Forge%20Installs&query=package.installs&suffix=%25&url=https%3A%2F%2Fforge-vtt.com%2Fapi%2Fbazaar%2Fpackage%2Ffvtt-r-maps&colorB=4aa94a)](https://forge-vtt.com/bazaar#package=fvtt-r-maps)
-
 This is a tool to help you make r-maps, a.k.a. relationship maps, Anacapa
 charts, conspiracy maps, in your Foundry VTT game.
 
@@ -80,7 +76,7 @@ Nice-to-have:
 
 ## Mods to synergize with
 
- - https://github.com/dev7355608/advanced-drawing-tools
+ - Advanced Drawing Tools
     - You can add nodes and add Smoothing Factor to get nice arcs, but as soon
       as you move any connected token, the line will snap back to being
       straight.
@@ -88,15 +84,15 @@ Nice-to-have:
       yarn styling yet.
     - No text-that-follows-line-arc yet.
 
- - https://github.com/Feu-Secret/Tokenmagic
+ - Token Magic
     - Just having this enabled on your game will get some reasonable defaults
       on your edges.
 
- - https://foundryvtt.com/packages/vtta-tokenizer
+ - Tokenizer
      - This is great for making tokens with a frame, such as the polaroid
        picture frame I used the demos.
 
- - https://foundryvtt.com/packages/move-that-for-you
+ - Move That for You
     - Careful about this one; it is more likely to lead to trouble than just
       giving players ownership over tokens will.
     - Enable MT4U on tokens.
