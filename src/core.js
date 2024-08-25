@@ -54,10 +54,14 @@ export class RMaps {
     const newEdges = {
       [newEdge.id]: newEdge,
     };
-    await canvas?.scene.tokens
-      .get(tokenId)
-      ?.setFlag("fvtt-r-maps", "r-maps-edges", newEdges);
-    return newEdge.id;
+    if (!game.user.isGM) {
+      await game.socket.emit("module.fvtt-r-maps", { newEdge, newEdges, tokenId });
+    } else {
+      await canvas?.scene.tokens
+        .get(tokenId)
+        ?.setFlag("fvtt-r-maps", "r-maps-edges", newEdges);
+        this.drawEdge(newEdge.id);
+    }
   }
 
   static updateEdge(edgeId, updateData) {

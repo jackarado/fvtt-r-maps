@@ -21,7 +21,7 @@
       }
     ]
   },
-  "type": "module",
+  "socket": true,
   "esmodules": ["src/hooks.js"],
   "url": "#{URL}#",
   "manifest": "#{MANIFEST}#",

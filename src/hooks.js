@@ -6,6 +6,18 @@ Hooks.on("getSceneControlButtons", (buttons) => {
   RMaps.onGetSceneControlButtons(buttons);
 });
 
+Hooks.once("init", () => {
+  game.socket.on("module.fvtt-r-maps", async (data) => {
+    const { newEdge, newEdges, tokenId } = data;
+		if (game.users.activeGM?.isSelf && tokenId) {
+			await canvas?.scene.tokens
+        .get(tokenId)
+        ?.setFlag("fvtt-r-maps", "r-maps-edges", newEdges);
+      RMaps.drawEdge(newEdge.id);
+		}
+	});
+});
+
 Hooks.on("libWrapper.Ready", () => {
   // Reset all the wrappers for this module:
   libWrapper.unregister_all("fvtt-r-maps");
@@ -18,6 +30,15 @@ Hooks.on("libWrapper.Ready", () => {
       return wrapped(...args) || game.activeTool === "drawEdge";
     },
     "WRAPPER"
+  );
+  libWrapper.register(
+    "fvtt-r-maps",
+    "Token.prototype._canDragLeftStart",
+    function (wrapped, user, event) {
+      if (game.activeTool === "drawEdge") return true;
+      return wrapped(user, event);
+    },
+    "MIXED"
   );
   libWrapper.register(
     "fvtt-r-maps",
@@ -84,7 +105,6 @@ Hooks.on("libWrapper.Ready", () => {
               RMaps.state.originToken.id,
               { to: target.id }
             );
-            RMaps.drawEdge(edgeId);
           }
         } catch (_) {
           // Clean up:
