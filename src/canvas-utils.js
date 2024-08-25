@@ -9,16 +9,20 @@ export function xyFromEvent(event) {
 export function xyInsideTargets({ x, y }) {
   return canvas.tokens.placeables.filter((obj) => {
     if (!obj.visible || canvas.tokens.controlledObjects.get(obj.id)) return false;
-    let ul = {
-      x: obj.x,
-      y: obj.y,
-    };
-    let lr = {
-      x: obj.x + obj.hitArea.width,
-      y: obj.y + obj.hitArea.height,
-    };
-    return Number.between(x, ul.x, lr.x) && Number.between(y, ul.y, lr.y);
+    return isTokenInside(obj, { x, y });
   });
+}
+
+export function isTokenInside(obj, { x, y }) {
+  let ul = {
+    x: obj.x,
+    y: obj.y,
+  };
+  let lr = {
+    x: obj.x + obj.hitArea.width,
+    y: obj.y + obj.hitArea.height,
+  };
+  return Number.between(x, ul.x, lr.x) && Number.between(y, ul.y, lr.y);
 }
 
 export class Line extends PIXI.Graphics {
