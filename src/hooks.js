@@ -26,9 +26,9 @@ Hooks.on("libWrapper.Ready", () => {
       if (game.activeTool === "drawEdge") {
         if (canvas.tokens.controlledObjects.size === 1) {
           RMaps.state.originToken = this;
-          const pixiLine = (RMaps.state.pixiLine = new Line(this.center));
+          RMaps.state.pixiLine = new Line(this.center);
           const spot = this.center;
-          pixiLine.update(spot);
+          RMaps.state.pixiLine.update(spot);
           return;
         } else {
           ui.notifications.warn(`You must have only 1 token selected.`);
@@ -46,8 +46,7 @@ Hooks.on("libWrapper.Ready", () => {
       if (game.activeTool === "drawEdge") {
         if (canvas.tokens.controlledObjects.size === 1) {
           const spot = xyFromEvent(event);
-          const pixiLine = RMaps.state.pixiLine;
-          pixiLine.update(spot);
+          RMaps.state.pixiLine.update(spot);
           return;
         }
       } else {
