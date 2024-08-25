@@ -47,6 +47,9 @@ export class RMaps {
 
   static async createEdge(tokenId, edgeData) {
     const id = foundry.utils.randomID(16);
+
+    if (this.checkDuplicates(tokenId, edgeData.to)) return;
+
     const newEdge = {
       ...edgeData,
       fromId: tokenId
@@ -62,6 +65,12 @@ export class RMaps {
         ?.setFlag("fvtt-r-maps", "r-maps-edges", newEdges);
         this.drawEdge(id);
     }
+  }
+
+  static checkDuplicates(a, b) {
+    return Object.values(RMaps.allEdges).some((edge) => {
+      return [a, b].includes(edge.to) && [a, b].includes(edge.fromId);
+    });
   }
 
   static updateEdge(edgeId, updateData) {
