@@ -212,7 +212,7 @@ Hooks.on("preDeleteToken", async (token) => {
 Hooks.on("preDeleteDrawing", async (drawing) => {
   await Promise.all(
     Object.entries(RMaps.allEdges)
-      .filter((key, edge) => edge.drawingId === drawing.id)
-      .map((key, edge) => RMaps.deleteEdge(key))
+      .filter(([key, edge]) => edge.drawingId === drawing.id)
+      .map(([key, edge]) => RMaps.deleteEdge(key))
   );
 });
