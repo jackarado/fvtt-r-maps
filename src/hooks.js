@@ -135,6 +135,10 @@ Hooks.on("libWrapper.Ready", () => {
         const token = canvas.tokens.placeables
           .filter((t) => t.visible)
           .find((t) => isTokenInside(t, spot));
+        if (!token) {
+          wrapped(event);
+          return;
+        }
         RMaps.state.originToken = token;
         RMaps.state.pixiLine = new Line(token.center);
         RMaps.state.pixiLine.update(spot);
@@ -148,7 +152,7 @@ Hooks.on("libWrapper.Ready", () => {
     "TokenLayer.prototype._onDragLeftMove",
     (wrapped, event) => {
       wrapped(event);
-      if (game.activeTool === "drawEdge") {
+      if (game.activeTool === "drawEdge" && RMaps.state.pixiLine) {
         const spot = xyFromEvent(event);
         RMaps.state.pixiLine.update(spot);
       }
@@ -159,7 +163,7 @@ Hooks.on("libWrapper.Ready", () => {
     "TokenLayer.prototype._onDragLeftCancel",
     async (wrapped, event) => {
       wrapped(event);
-      RMaps.state.pixiLine.clear();
+      RMaps.state.pixiLine?.clear();
       RMaps.state.pixiLine = null;
     }, "WRAPPER"
   );
@@ -168,7 +172,7 @@ Hooks.on("libWrapper.Ready", () => {
     "TokenLayer.prototype._onDragLeftDrop",
     async (wrapped, event) => {
       wrapped(event);
-      if (game.activeTool === "drawEdge") {
+      if (game.activeTool === "drawEdge" && RMaps.state.pixiLine) {
         try {
           // Find if we picked a token:
           const spot = xyFromEvent(event);
