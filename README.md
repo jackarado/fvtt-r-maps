@@ -27,6 +27,15 @@ update as you move the tokens around.
 
 [Paul's R-Map Method](https://www.indiegamereadingclub.com/indie-game-reading-club/pauls-r-map-method/)
 
+## Compatibility with the Drag Ruler module
+If you're using the Drag Ruler module, follow these steps to guarantee both modules work correctly.
+
+
+1. Go to Game Settings > libWrapper > libWrapper Settings Menu.
+2. Move R-Maps to the Prioritized Packages box (select it and click the up arrow above it).
+    - If Drag Ruler is also Prioritized, position R-Maps above it in there.
+3. Save and reload.
+
 ## Mods to synergize with
 
  - Advanced Drawing Tools
