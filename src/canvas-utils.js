@@ -19,8 +19,8 @@ export function isTokenInside(obj, { x, y }) {
     y: obj.y,
   };
   let lr = {
-    x: obj.x + obj.hitArea.width,
-    y: obj.y + obj.hitArea.height,
+    x: obj.x + (canvas.grid.type > 1 ? Math.max(...obj.hitArea.points) : obj.hitArea.width),
+    y: obj.y + (canvas.grid.type > 1 ? Math.max(...obj.hitArea.points) : obj.hitArea.height),
   };
   return Number.between(x, ul.x, lr.x) && Number.between(y, ul.y, lr.y);
 }
