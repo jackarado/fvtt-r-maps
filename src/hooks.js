@@ -94,23 +94,7 @@ Hooks.on("libWrapper.Ready", () => {
         game.activeTool === "drawEdge" &&
         canvas.tokens.controlledObjects.size === 1
       ) {
-        try {
-          // Find if we picked a token:
-          const spot = xyFromEvent(event);
-          const targets = xyInsideTargets(spot);
-          if (targets.length === 1) {
-            // We have a winner.
-            const target = targets[0];
-            await RMaps.createEdge(
-              RMaps.state.originToken.id,
-              { to: target.id }
-            );
-          }
-        } catch (_) {
-          // Clean up:
-          RMaps.state.pixiLine?.clear();
-          RMaps.state.pixiLine = null;
-        }
+        _onDragLeftDrop(event);
       } else {
         return wrapped(event);
       }
@@ -173,27 +157,31 @@ Hooks.on("libWrapper.Ready", () => {
     async (wrapped, event) => {
       wrapped(event);
       if (game.activeTool === "drawEdge" && RMaps.state.pixiLine) {
-        try {
-          // Find if we picked a token:
-          const spot = xyFromEvent(event);
-          const targets = xyInsideTargets(spot);
-          if (targets.length === 1) {
-            // We have a winner.
-            const target = targets[0];
-            await RMaps.createEdge(
-              RMaps.state.originToken.id,
-              { to: target.id }
-            );
-          }
-        } catch (_) {
-          // Clean up:
-          RMaps.state.pixiLine.clear();
-          RMaps.state.pixiLine = null;
-        }
+        _onDragLeftDrop(event);
       }
     }, "WRAPPER"
   );
 });
+
+async function _onDragLeftDrop(event) {
+  try {
+    // Find if we picked a token:
+    const spot = xyFromEvent(event);
+    const targets = xyInsideTargets(spot);
+    if (targets.length === 1) {
+      // We have a winner.
+      const target = targets[0];
+      await RMaps.createEdge(
+        RMaps.state.originToken.id,
+        { to: target.id }
+      );
+    }
+  } catch (_) {
+    // Clean up:
+    RMaps.state.pixiLine?.clear();
+    RMaps.state.pixiLine = null;
+  }
+}
 
 // Trigger redrawing edges when a token moves:
 Hooks.on("updateToken", (token, change) => {
