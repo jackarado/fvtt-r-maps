@@ -39,9 +39,7 @@ If you're using the Drag Ruler module, follow these steps to guarantee both modu
 ## Mods to synergize with
 
  - Advanced Drawing Tools
-    - You can add nodes and add Smoothing Factor to get nice arcs, but as soon
-      as you move any connected token, the line will snap back to being
-      straight.
+    - You can add nodes and add Smoothing Factor to get nice arcs.
     - Since the lines are just _lines_, you can't apply fill to them. So no
       yarn styling yet.
     - No text-that-follows-line-arc yet.
@@ -49,16 +47,3 @@ If you're using the Drag Ruler module, follow these steps to guarantee both modu
  - Token Magic
     - Just having this enabled on your game will get some reasonable defaults
       on your edges.
-
- - Tokenizer
-     - This is great for making tokens with a frame, such as the polaroid
-       picture frame I used the demos.
-
- - Move That for You
-    - Careful about this one; it is more likely to lead to trouble than just
-      giving players ownership over tokens will.
-    - Enable MT4U on tokens.
-    - Then the GM can mark all tokens on the r-map sheet as moveable.
-    - But the players should be careful not to draw lines from tokens they
-      don't own, because that'll still fail, and leave the board in an ugly
-      state.
