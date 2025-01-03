@@ -8,7 +8,16 @@ export function xyFromEvent(event) {
 
 export function xyInsideTargets({ x, y }) {
   return canvas.tokens.placeables.filter((obj) => {
-    if (!obj.visible || canvas.tokens.controlledObjects.get(obj.id)) return false;
+    if (
+      !obj.visible
+      || canvas.tokens.controlledObjects.has(obj.id)
+      || x < obj.x
+      || y < obj.y
+      || (
+        obj.hitArea instanceof PIXI.Rectangle
+        && (x > obj.x + obj.hitArea.width || y > obj.y + obj.hitArea.height)
+      )
+    ) return false;
     return isTokenInside(obj, { x, y });
   });
 }
