@@ -7,31 +7,35 @@ export function xyFromEvent(event) {
 }
 
 export function xyInsideTargets({ x, y }) {
-  return canvas.tokens.placeables.filter((obj) => {
+  return canvas.notes.placeables.filter((obj) => {
     if (
       !obj.visible
-      || canvas.tokens.controlledObjects.has(obj.id)
-      || x < obj.x
-      || y < obj.y
       || (
-        obj.hitArea instanceof PIXI.Rectangle
-        && (x > obj.x + obj.hitArea.width || y > obj.y + obj.hitArea.height)
+        obj.bounds instanceof PIXI.Rectangle
+        && (
+          x < obj.x - (0.5 * obj.bounds.width)
+          || x > obj.x + (0.5 * obj.bounds.width)
+          || y < obj.y - (0.5 * obj.bounds.height)
+          || y > obj.y + (0.5 * obj.bounds.height)
+        )
       )
     ) return false;
-    return isTokenInside(obj, { x, y });
+    return isNoteInside(obj, { x, y });
   });
 }
 
-export function isTokenInside(obj, { x, y }) {
+export function isNoteInside(obj, { x, y }) {
   let ul = {
     x: obj.x,
     y: obj.y,
   };
   let lr = {
-    x: obj.x + (canvas.grid.type > 1 ? Math.max(...obj.hitArea.points) : obj.hitArea.width),
-    y: obj.y + (canvas.grid.type > 1 ? Math.max(...obj.hitArea.points) : obj.hitArea.height),
+    x: (canvas.grid.type > 1 ? Math.max(...obj.bounds.points) : obj.bounds.width),
+    y: (canvas.grid.type > 1 ? Math.max(...obj.bounds.points) : obj.bounds.height),
   };
-  return Number.between(x, ul.x, lr.x) && Number.between(y, ul.y, lr.y);
+  //console.log(obj, x, y, ul, lr);
+  //console.log(Number.between(x, ul.x - lr.x, ul.x + lr.x) && Number.between(y, ul.y - lr.y, ul.y + lr.y));
+  return Number.between(x, ul.x - lr.x, ul.x + lr.x) && Number.between(y, ul.y - lr.y, ul.y + lr.y);
 }
 
 export class Line extends PIXI.Graphics {

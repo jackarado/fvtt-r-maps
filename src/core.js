@@ -7,15 +7,15 @@ import { getEdgeGivenTwoNodes } from "./canvas-utils.js";
 
 export class RMaps {
   static state = {
-    originToken: null,
+    originNote: null,
     pixiLine: null,
   };
 
   // XXX: This should maybe be in our "operations" class?
-  // TODO: insert this into Drawing tools, not Token tools.
+  // TODO: insert this into Drawing tools, not Note tools.
   static onGetSceneControlButtons(buttons) {
-    const tokenTools = buttons.find((b) => b.name === "token")?.tools;
-    tokenTools?.push({
+    const noteTools = buttons.find((b) => b.name === "notes")?.tools;
+    noteTools?.push({
       name: "drawEdge",
       title: "Draw a connection",
       icon: "fas fa-chart-network",
@@ -23,13 +23,13 @@ export class RMaps {
   }
 
   static get allEdges() {
-    const allEdges = (canvas?.scene.tokens || []).reduce(
-      (accumulator, token) => {
-        const tokenEdges = this.getEdgesForToken(token.id);
+    const allEdges = (canvas?.scene.notes || []).reduce(
+      (accumulator, note) => {
+        const noteEdges = this.getEdgesForNote(note.id);
 
         return {
           ...accumulator,
-          ...tokenEdges,
+          ...noteEdges,
         };
       },
       {}
@@ -38,30 +38,30 @@ export class RMaps {
     return allEdges;
   }
 
-  static getEdgesForToken(tokenId) {
+  static getEdgesForNote(noteId) {
     return (
-      canvas?.scene.tokens.get(tokenId)?.getFlag("fvtt-r-maps", "r-maps-edges") ||
+      canvas?.scene.notes.get(noteId)?.getFlag("fvtt-r-maps", "r-maps-edges") ||
       {}
     );
   }
 
-  static async createEdge(tokenId, edgeData) {
+  static async createEdge(noteId, edgeData) {
     const id = foundry.utils.randomID(16);
 
-    if (this.checkDuplicates(tokenId, edgeData.to)) return;
+    if (this.checkDuplicates(noteId, edgeData.to)) return;
 
     const newEdge = {
       ...edgeData,
-      fromId: tokenId
+      fromId: noteId
     };
     const newEdges = {
       [id]: newEdge,
     };
     if (!game.user.isGM) {
-      await game.socket.emit("module.fvtt-r-maps", { id, newEdges, tokenId });
+      await game.socket.emit("module.fvtt-r-maps", { id, newEdges, noteId });
     } else {
-      await canvas?.scene.tokens
-        .get(tokenId)
+      await canvas?.scene.notes
+        .get(noteId)
         ?.setFlag("fvtt-r-maps", "r-maps-edges", newEdges);
         this.drawEdge(id);
     }
@@ -78,7 +78,7 @@ export class RMaps {
     const update = {
       [edgeId]: updateData,
     };
-    return canvas?.scene.tokens
+    return canvas?.scene.notes
       .get(relevantEdge.fromId)
       ?.setFlag("fvtt-r-maps", "r-maps-edges", update);
   }
@@ -90,15 +90,15 @@ export class RMaps {
     const keyDeletion = {
       [`-=${edgeId}`]: null,
     };
-    return canvas?.scene.tokens
+    return canvas?.scene.notes
       .get(relevantEdge.fromId)
       ?.setFlag("fvtt-r-maps", "r-maps-edges", keyDeletion);
   }
 
-  static deleteAllEdgesToAndFrom(token) {
+  static deleteAllEdgesToAndFrom(note) {
     return Promise.all(
       Object.values(this.allEdges)
-      .filter((edge) => edge.to === token.id || edge.fromId === token.id)
+      .filter((edge) => edge.to === note.id || edge.fromId === note.id)
       .map((edge) => {
         const { drawingId } = edge;
         const drawing = canvas.scene.drawings.get(drawingId);
@@ -109,21 +109,18 @@ export class RMaps {
 
   /**
    *
-   * @param {Token} token
+   * @param {Note} note
    * @param {Object} node
    * @returns
    */
-  static async updateEdgeDrawingsForToken(token, node = {}) {
+  static async updateEdgeDrawingsForNote(note, node = {}) {
     // Inbound edges:
     const inbound = Object.values(this.allEdges)
-      .filter((edge) => edge.to === token.id)
+      .filter((edge) => edge.to === note.id)
       .map((edge) => {
         const { drawingId, fromId } = edge;
-        const fromNode = canvas.scene.tokens.get(fromId)?.object.center;
-        const toNode = token.object.getCenterPoint({
-          x: node.x ?? token.object.x,
-          y: node.y ?? token.object.y,
-        });
+        const fromNode = canvas.scene.notes.get(fromId)?.object.center;
+        const toNode = note.object.center;
 
         const newEdge = getEdgeGivenTwoNodes(fromNode, toNode);
         return {
@@ -132,15 +129,12 @@ export class RMaps {
         };
       });
     // Outbound edges:
-    const outbound = Object.values(this.getEdgesForToken(token.id)).map(
+    const outbound = Object.values(this.getEdgesForNote(note.id)).map(
       (edge) => {
         const { drawingId, to } = edge;
 
-        const fromNode = token.object.getCenterPoint({
-          x: node.x ?? token.object.x,
-          y: node.y ?? token.object.y,
-        });
-        const toNode = canvas.scene.tokens.get(to)?.object.center;
+        const fromNode = note.object.center;
+        const toNode = canvas.scene.notes.get(to)?.object.center;
 
         const newEdge = getEdgeGivenTwoNodes(fromNode, toNode);
         return {
@@ -149,7 +143,7 @@ export class RMaps {
         };
       }
     );
-    // TODO: this is failing for some tokens. I think the pattern is "non-PC
+    // TODO: this is failing for some notes. I think the pattern is "non-PC
     // actors" and that may be because they're not getting their data stored
     // right?
     const updates = await canvas.scene.updateEmbeddedDocuments("Drawing", [
@@ -162,9 +156,9 @@ export class RMaps {
   // This pertains to Drawings:
   static async drawEdge(edgeId) {
     const relevantEdge = this.allEdges[edgeId];
-    const fromNode = canvas?.scene.tokens.get(relevantEdge.fromId)._object
+    const fromNode = canvas?.scene.notes.get(relevantEdge.fromId)._object
       .center;
-    const toNode = canvas?.scene.tokens.get(relevantEdge.to)._object.center;
+    const toNode = canvas?.scene.notes.get(relevantEdge.to)._object.center;
 
     const edge = {
       ...getEdgeGivenTwoNodes(fromNode, toNode),
@@ -177,7 +171,7 @@ export class RMaps {
       edge,
     ]);
 
-    // If we have Tokenmagic set up, apply some default filters:
+    //If we have Tokenmagic set up, apply some default filters:
     if (game.modules.get('tokenmagic')?.active) {
       let params = [
         {
